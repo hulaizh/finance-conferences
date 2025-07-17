@@ -174,7 +174,7 @@ finance-conferences/
 ├── main.py                 # Main pipeline orchestrator
 ├── src/
 │   ├── deepseek.py         # DeepSeek API processor
-│   └── scraper.py     # Additional extraction utilities
+│   └── scraper.py     # SSRN conference scraper
 ├── requirements.txt        # Python dependencies
 ├── .gitignore             # Git ignore file
 ├── README.md              # This documentation
