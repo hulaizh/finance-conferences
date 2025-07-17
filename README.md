@@ -19,8 +19,8 @@ This tool automatically:
 
 ### Installation
 ```bash
-git clone https://github.com/yourusername/conference-processing-pipeline.git
-cd conference-processing-pipeline
+git clone https://github.com/hulaizh/finance-conferences.git
+cd finance-conferences
 pip install -r requirements.txt
 echo "your_deepseek_api_key" > deepseek.txt
 ```
