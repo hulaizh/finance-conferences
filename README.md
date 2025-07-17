@@ -1,4 +1,4 @@
-# 🎯 Conference Processing Pipeline
+# Academic Finance Conferences
 
 A pipeline for scraping conference information from SSRN and enriching it with AI-extracted details.
 
