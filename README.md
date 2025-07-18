@@ -1,197 +1,130 @@
-# Academic Finance Conferences
+# Finance Conference Scraper
 
-A comprehensive pipeline for scraping, processing, and enriching conference information from SSRN (Social Science Research Network) using AI-powered data extraction.
-
-## 🚀 Overview
-
-The pipeline consists of 4 main steps:
-1. **Web Scraping**: Extract conference data from SSRN professional announcements using Selenium
-2. **Data Comparison**: Identify new conferences not yet in the database
-3. **AI Enhancement**: Use DeepSeek API to extract additional conference details
-4. **Database Update**: Merge new data with existing conference database
-
+A **high-performance** pipeline for scraping and processing finance conference data from SSRN using AI-powered data extraction.
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
 1. **Python 3.7+**
-2. **Chrome Browser** installed
-3. **ChromeDriver** installed and in PATH
-4. **DeepSeek API Key**
+2. **DeepSeek API Key**
 
 ### Installation
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/hulaizh/finance-conferences.git
-   cd finance-conferences
-   ```
+```bash
+# Install dependencies
+pip install -r requirements.txt
 
-2. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Set up DeepSeek API key**:
-   ```bash
-   echo "your_deepseek_api_key_here" > deepseek.txt
-   ```
-
-4. **Install ChromeDriver**:
-   ```bash
-   # macOS
-   brew install chromedriver
-   
-   # Or download from: https://chromedriver.chromium.org/
-   ```
+# Set up DeepSeek API key
+echo "your_deepseek_api_key_here" > deepseek.txt
+```
 
 ### Basic Usage
 
 ```bash
-# Run the complete pipeline (recommended)
+# Run the complete pipeline (3-5 minutes)
 python main.py
 
-# Force re-scraping and re-processing
-python main.py --force-scrape --force-deepseek
-```
-
-## 📖 Usage Guide
-
-### 🎯 Complete Pipeline (Recommended)
-
-The main pipeline orchestrates the entire process automatically:
-
-```bash
-python main.py
-```
-
-#### What it does:
-1. **Scrapes SSRN** → Creates/updates `ssrn.csv` with all conference data
-2. **Finds New Conferences** → Compares `ssrn.csv` with existing `conferences.csv`
-3. **AI Enhancement** → Uses DeepSeek API to extract additional info for new conferences
-4. **Updates Database** → Appends new data to `conferences.csv`
-
-#### Pipeline Options:
-
-```bash
-# Force re-scraping even if ssrn.csv exists
-python main.py --force-scrape
-
-# Force re-processing all conferences with DeepSeek
-python main.py --force-deepseek
-
-# Both options
-python main.py --force-scrape --force-deepseek
-```
-
-### 🔧 Individual Components
-
-#### 1. SSRN Scraper Only
-```bash
-python src/scraper.py
-```
-- Scrapes all conferences from SSRN
-- Saves to `ssrn.csv`
-- Extracts: title, dates, location, description, links
-
-#### 2. DeepSeek Processor Only
-```bash
-python src/deepseek.py
-```
-- Requires existing `ssrn.csv`
-- Uses AI to extract: submission deadlines, fees, continent
-- Saves to `conferences.csv`
-
-### 📈 Example Workflow
-
-```bash
-# First run - processes all conferences
-python main.py
-
-# Later runs - only processes new conferences
-python main.py
+# Ultra-fast mode - basic info only (1-2 minutes)
+python main.py --fast-mode
 
 # Force complete refresh
 python main.py --force-scrape --force-deepseek
+```
+
+**Note**: The scraper uses multiple automated fallback methods (async requests → Selenium → sync requests) to handle Cloudflare protection and ensure reliable data collection.
+
+## 📖 Usage Guide
+
+### Complete Pipeline
+
+The pipeline automatically:
+1. **Scrapes SSRN** → Creates/updates `ssrn.csv` with conference data
+2. **Finds New Conferences** → Compares with existing `conferences.csv`
+3. **AI Enhancement** → Uses DeepSeek API to extract additional info
+4. **Updates Database** → Appends new data to `conferences.csv`
+
+### Command Options
+
+```bash
+python main.py [OPTIONS]
+
+Options:
+  --force-scrape              Force re-scraping even if ssrn.csv exists
+  --force-deepseek            Force re-processing all conferences
+  --no-cache                  Disable caching for DeepSeek API calls
+  --fast-mode                 Skip detailed scraping for ultra-fast processing
+  --max-scrape-concurrent N   Max concurrent connections (default: 3)
+  --max-api-concurrent N      Max concurrent API calls (default: 5)
+```
+
+### Individual Components
+
+Run individual components if needed:
+
+```bash
+# Scraper only (with automatic fallback methods)
+python scraper.py
+
+# DeepSeek processor only  
+python deepseek.py
 ```
 
 ## 📊 Output Files
 
 - **`ssrn.csv`**: Raw scraped data from SSRN
 - **`conferences.csv`**: Final enriched database with AI-extracted information
-- **`conference_pipeline.log`**: Detailed processing logs
+- **`pipeline.log`**: Detailed processing logs
+- **`.deepseek_cache.pkl`**: API response cache (speeds up future runs)
 
 ## 📊 Final Output Structure
 
-The final `conferences.csv` contains:
+The `conferences.csv` contains:
 - **Title**: Conference title
-- **Conference Dates**: Conference dates
+- **Conference Dates**: Conference dates  
 - **Location**: Conference location
 - **Link**: SSRN announcement link
 - **Submission Deadline**: AI-extracted deadline (e.g., "2025/08/17")
 - **Submission Fee**: AI-extracted fee (e.g., "$50")
-- **Registration Fee**: AI-extracted fee (e.g., "$400")
+- **Registration Fee**: AI-extracted fee (e.g., "$400")  
 - **Continent**: AI-extracted continent (e.g., "North America")
-
-## 🎯 Extracted Information
-
-For each conference in `ssrn.csv`, the scraper extracts:
-
-- **title**: Conference title and call for papers information
-- **conference_dates**: Conference dates
-- **location**: Conference location
-- **description**: Detailed conference description from individual SSRN announcement pages
-- **ssrn_link**: Direct link to the detailed SSRN announcement
-
-## 📋 Command Line Options
-
-### Main Pipeline
-```bash
-python main.py [OPTIONS]
-
-Options:
-  --force-scrape      Force re-scraping even if ssrn.csv exists
-  --force-deepseek    Force re-processing all conferences with DeepSeek
-```
-
-### Individual Scraper
-```bash
-python src/scraper.py [OPTIONS]
-
-Options:
-  -h, --help            Show help message
-  -o, --output OUTPUT   Output filename (CSV or Excel)
-  --no-descriptions     Skip detailed descriptions (faster)
-  --headless           Run Chrome in headless mode (default)
-  --visible            Run Chrome in visible mode (for debugging)
-```
 
 ## 📁 Project Structure
 
 ```
 finance-conferences/
-├── main.py                 # Main pipeline orchestrator
-├── src/
-│   ├── deepseek.py         # DeepSeek API processor
-│   └── scraper.py     # SSRN conference scraper
-├── requirements.txt        # Python dependencies
-├── .gitignore             # Git ignore file
-├── README.md              # This documentation
-├── deepseek.txt           # DeepSeek API key (not in repo)
-├── ssrn.csv              # Raw scraped data (generated)
-├── conferences.csv       # Final enriched database (generated)
-└── conference_pipeline.log # Processing logs (generated)
+├── main.py              # Main pipeline orchestrator
+├── scraper.py           # High-performance SSRN scraper with fallback methods
+├── deepseek.py          # Fast DeepSeek API processor
+├── requirements.txt     # Python dependencies
+├── README.md           # This documentation
+├── deepseek.txt        # DeepSeek API key (not in repo)
+├── .deepseek_cache.pkl # API response cache (generated)
+├── ssrn.csv           # Raw scraped data (generated)
+├── conferences.csv    # Final enriched database (generated)
+└── pipeline.log       # Processing logs (generated)
 ```
+
+## 💡 Best Practices
+
+### For Maximum Speed
+- Use **caching** (default enabled)
+- Run **incremental updates** (only processes new conferences)
+- Use **fast-mode** for initial data collection
+- Adjust **concurrency** based on your system capabilities
+
+### For Reliability  
+- Use **conservative concurrency** settings in production
+- Enable **detailed logging** for debugging
+- Monitor **rate limits** and adjust accordingly
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+MIT License
