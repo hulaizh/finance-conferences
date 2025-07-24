@@ -10,6 +10,7 @@ new_conferences_temp.csv
 conferences_progress_*.csv
 *.pkl
 
+
 # Mac OS
 .DS_Store
 _DS_Store
@@ -21,6 +22,7 @@ replication/
 output/
 results/
 result/
+.claude/
 
 # Stata
 *.stswp
