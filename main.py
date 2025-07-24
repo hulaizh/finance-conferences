@@ -23,8 +23,8 @@ import argparse
 import logging
 import time
 
-from scraper import ConferenceScraper
-from deepseek import DeepSeekProcessor
+from src.scraper import ConferenceScraper
+from src.deepseek import DeepSeekProcessor
 
 # Set up logging
 logging.basicConfig(
@@ -43,9 +43,9 @@ class ConferencePipeline:
     
     def __init__(self, enable_cache: bool = True, max_concurrent_scrape: int = 3, 
                  max_concurrent_api: int = 5):
-        self.ssrn_csv = "ssrn.csv"
-        self.conferences_csv = "conferences.csv"
-        self.temp_new_conferences_csv = "new_conferences_temp.csv"
+        self.ssrn_csv = "output/ssrn.csv"
+        self.conferences_csv = "output/conferences.csv"
+        self.temp_new_conferences_csv = "output/new_conferences_temp.csv"
         self.enable_cache = enable_cache
         self.max_concurrent_scrape = max_concurrent_scrape
         self.max_concurrent_api = max_concurrent_api
@@ -153,7 +153,7 @@ class ConferencePipeline:
             
             async with DeepSeekProcessor(
                 max_concurrent=self.max_concurrent_api,
-                enable_cache=self.enable_cache
+                enable_cache=self.enable_cache and not force_deepseek
             ) as processor:
                 processed_df = await processor.process_conferences_batch(new_conferences_df)
                 
@@ -185,12 +185,12 @@ class ConferencePipeline:
         try:
             new_conferences_formatted = processed_new_conferences[[
                 'title', 'conference_dates', 'location', 'ssrn_link',
-                'Submission Deadline', 'Submission Fee', 'Registration Fee', 'Continent'
+                'Submission Deadline', 'Submission Fees', 'Registration Fees', 'Continent'
             ]].copy()
             
             new_conferences_formatted.columns = [
                 'Title', 'Conference Dates', 'Location', 'Link',
-                'Submission Deadline', 'Submission Fee', 'Registration Fee', 'Continent'
+                'Submission Deadline', 'Submission Fees', 'Registration Fees', 'Continent'
             ]
             
             if os.path.exists(self.conferences_csv):

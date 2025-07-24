@@ -23,8 +23,8 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ConferenceResult:
     submission_deadline: str = ""
-    submission_fee: str = ""
-    registration_fee: str = ""
+    submission_fees: str = ""
+    registration_fees: str = ""
     continent: str = ""
 
 
@@ -50,17 +50,17 @@ class DeepSeekProcessor:
 
 {{
   "Submission Deadline": "",
-  "Submission Fee": "",
-  "Registration Fee": "",
+  "Submission Fees": "",
+  "Registration Fees": "",
   "Continent": ""
 }}
 
 EXTRACTION RULES:
-1. Submission Deadline: Find submission/paper deadlines. Format as YYYY/MM/DD (e.g., 2025/12/31). Use "" if not found.
+1. Submission Deadline: Find submission/paper/abstract deadlines. Format as YYYY/MM/DD (e.g., 2025/12/31). Use "" if not found.
 
-2. Submission Fee: Find submission/application fees. Include currency and amount (e.g., "$50", "€75"). Use "" if not mentioned or free.
+2. Submission Fees: Find submission/application/paper fees. Include currency and amount (e.g., "$50", "€75", "Free"). Use "" if not mentioned.
 
-3. Registration Fee: Find conference/registration fees. Include currency and amount (e.g., "$400", "€300"). Use "" if not mentioned.
+3. Registration Fees: Find conference/registration/attendance fees. Include currency and amount (e.g., "$400", "€300", "Free"). Use "" if not mentioned.
 
 4. Continent: Based on location, return exactly one of: Asia, Australia, Europe, North America, South America, Africa. Use geographical knowledge.
 
@@ -157,8 +157,8 @@ CRITICAL: Return ONLY the JSON object with the four fields above. No explanation
                         if self.enable_cache and parsed_result:
                             self.cache[cache_key] = {
                                 'submission_deadline': parsed_result.submission_deadline,
-                                'submission_fee': parsed_result.submission_fee,
-                                'registration_fee': parsed_result.registration_fee,
+                                'submission_fees': parsed_result.submission_fees,
+                                'registration_fees': parsed_result.registration_fees,
                                 'continent': parsed_result.continent
                             }
                         
@@ -201,8 +201,8 @@ CRITICAL: Return ONLY the JSON object with the four fields above. No explanation
             data = json.loads(content)
             return ConferenceResult(
                 submission_deadline=data.get('Submission Deadline', ''),
-                submission_fee=data.get('Submission Fee', ''),
-                registration_fee=data.get('Registration Fee', ''),
+                submission_fees=data.get('Submission Fees', ''),
+                registration_fees=data.get('Registration Fees', ''),
                 continent=data.get('Continent', '')
             )
         except json.JSONDecodeError:
@@ -215,8 +215,8 @@ CRITICAL: Return ONLY the JSON object with the four fields above. No explanation
                     data = json.loads(json_str)
                     return ConferenceResult(
                         submission_deadline=data.get('Submission Deadline', ''),
-                        submission_fee=data.get('Submission Fee', ''),
-                        registration_fee=data.get('Registration Fee', ''),
+                        submission_fees=data.get('Submission Fees', ''),
+                        registration_fees=data.get('Registration Fees', ''),
                         continent=data.get('Continent', '')
                     )
                 except json.JSONDecodeError:
@@ -231,13 +231,13 @@ CRITICAL: Return ONLY the JSON object with the four fields above. No explanation
                 if deadline_match:
                     result.submission_deadline = deadline_match.group(1)
                 
-                sub_fee_match = re.search(r'"Submission Fee":\s*"([^"]*)"', content)
+                sub_fee_match = re.search(r'"Submission Fees":\s*"([^"]*)"', content)
                 if sub_fee_match:
-                    result.submission_fee = sub_fee_match.group(1)
+                    result.submission_fees = sub_fee_match.group(1)
                 
-                reg_fee_match = re.search(r'"Registration Fee":\s*"([^"]*)"', content)
+                reg_fee_match = re.search(r'"Registration Fees":\s*"([^"]*)"', content)
                 if reg_fee_match:
-                    result.registration_fee = reg_fee_match.group(1)
+                    result.registration_fees = reg_fee_match.group(1)
                 
                 continent_match = re.search(r'"Continent":\s*"([^"]*)"', content)
                 if continent_match:
@@ -262,8 +262,8 @@ CRITICAL: Return ONLY the JSON object with the four fields above. No explanation
         
         result_df = conferences_df.copy()
         result_df['Submission Deadline'] = ''
-        result_df['Submission Fee'] = ''
-        result_df['Registration Fee'] = ''
+        result_df['Submission Fees'] = ''
+        result_df['Registration Fees'] = ''
         result_df['Continent'] = ''
         
         semaphore = asyncio.Semaphore(self.max_concurrent)
@@ -298,8 +298,8 @@ CRITICAL: Return ONLY the JSON object with the four fields above. No explanation
                 if isinstance(result, tuple):
                     index, conference_result = result
                     result_df.at[index, 'Submission Deadline'] = conference_result.submission_deadline
-                    result_df.at[index, 'Submission Fee'] = conference_result.submission_fee
-                    result_df.at[index, 'Registration Fee'] = conference_result.registration_fee
+                    result_df.at[index, 'Submission Fees'] = conference_result.submission_fees
+                    result_df.at[index, 'Registration Fees'] = conference_result.registration_fees
                     result_df.at[index, 'Continent'] = conference_result.continent
                     processed_count += 1
                 elif isinstance(result, Exception):
@@ -318,7 +318,7 @@ CRITICAL: Return ONLY the JSON object with the four fields above. No explanation
         
         return result_df
     
-    async def process_from_csv(self, input_csv: str = "ssrn.csv", output_csv: str = "conferences.csv"):
+    async def process_from_csv(self, input_csv: str = "output/ssrn.csv", output_csv: str = "output/conferences.csv"):
         """Process conferences from CSV file"""
         try:
             df = pd.read_csv(input_csv)
@@ -334,13 +334,13 @@ CRITICAL: Return ONLY the JSON object with the four fields above. No explanation
         
         final_columns = [
             'title', 'conference_dates', 'location', 'description', 'ssrn_link',
-            'Submission Deadline', 'Submission Fee', 'Registration Fee', 'Continent'
+            'Submission Deadline', 'Submission Fees', 'Registration Fees', 'Continent'
         ]
         
         final_df = result_df[final_columns].copy()
         final_df.columns = [
             'Title', 'Conference Dates', 'Location', 'Description', 'Link',
-            'Submission Deadline', 'Submission Fee', 'Registration Fee', 'Continent'
+            'Submission Deadline', 'Submission Fees', 'Registration Fees', 'Continent'
         ]
         
         try:
