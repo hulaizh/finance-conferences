@@ -3,8 +3,8 @@
 deepseek.txt
 
 # Generated Data Files
-ssrn.csv
-conferences.csv
+# ssrn.csv
+# conferences.csv
 *.log
 new_conferences_temp.csv
 conferences_progress_*.csv
@@ -19,7 +19,7 @@ _DS_Store
 # Folders
 temp/
 replication/
-output/
+# output/
 results/
 result/
 .claude/
