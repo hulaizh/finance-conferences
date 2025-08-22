@@ -1,1 +1,0 @@
-# Finance Conference Scraper package

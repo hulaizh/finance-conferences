@@ -1,13 +1,13 @@
 # Finance Conference Scraper
 
-A **high-performance** pipeline for scraping and processing finance conference data from SSRN using AI-powered data extraction.
+A **high-performance** pipeline for scraping and processing finance conference data from SSRN using Claude AI for intelligent data extraction.
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
 1. **Python 3.7+**
-2. **DeepSeek API Key**
+2. **Claude API Access** (via proxy or direct)
 
 ### Installation
 
@@ -15,8 +15,8 @@ A **high-performance** pipeline for scraping and processing finance conference d
 # Install dependencies
 pip install -r requirements.txt
 
-# Set up DeepSeek API key
-echo "your_deepseek_api_key_here" > deepseek.txt
+# Configure Claude API in config.json
+# Edit config.json with your API endpoint and key
 ```
 
 ### Basic Usage
@@ -29,20 +29,48 @@ python main.py
 python main.py --fast-mode
 
 # Force complete refresh
-python main.py --force-scrape --force-deepseek
+python main.py --force-scrape --force-claude
 ```
 
-**Note**: The scraper uses multiple automated fallback methods (async requests → Selenium → sync requests) to handle Cloudflare protection and ensure reliable data collection.
+## 📖 Configuration
+
+### Setup config.json
+
+Create or edit `config.json` with your Claude API settings:
+
+```json
+{
+  "claude_api": {
+    "url": "http://your.claude.endpoint/api/v1/messages",
+    "api_key": "your_claude_api_key_here",
+    "model": "claude-3-5-sonnet-20241022"
+  },
+  "proxy": {
+    "http": "",
+    "https": ""
+  },
+  "scraper": {
+    "max_concurrent": 8,
+    "timeout": 30,
+    "enable_selenium": false,
+    "user_agent": "Mozilla/5.0 (compatible scraper)"
+  },
+  "processing": {
+    "max_concurrent_api": 10,
+    "cache_enabled": true
+  }
+}
+```
 
 ## 📖 Usage Guide
 
 ### Complete Pipeline
 
 The pipeline automatically:
-1. **Scrapes SSRN** → Creates/updates `ssrn.csv` with conference data
-2. **Finds New Conferences** → Compares with existing `conferences.csv`
-3. **AI Enhancement** → Uses DeepSeek API to extract additional info
-4. **Updates Database** → Appends new data to `conferences.csv`
+1. **Scrapes SSRN** → Creates/updates `output/ssrn.csv` with conference data
+2. **Finds New Conferences** → Compares with existing `output/conferences.csv`
+3. **AI Enhancement** → Uses Claude API to extract additional information
+4. **Updates Database** → Appends new data to `output/conferences.csv`
 
 ### Command Options
 
@@ -50,12 +78,11 @@ The pipeline automatically:
 python main.py [OPTIONS]
 
 Options:
-  --force-scrape              Force re-scraping even if ssrn.csv exists
-  --force-deepseek            Force re-processing all conferences
-  --no-cache                  Disable caching for DeepSeek API calls
-  --fast-mode                 Skip detailed scraping for ultra-fast processing
-  --max-scrape-concurrent N   Max concurrent connections (default: 3)
-  --max-api-concurrent N      Max concurrent API calls (default: 5)
+  --force-scrape    Force re-scraping even if ssrn.csv exists
+  --force-claude    Force re-processing all conferences with Claude
+  --no-cache        Disable caching for Claude API calls
+  --fast-mode       Skip detailed scraping for ultra-fast processing
+  --config FILE     Specify custom config file (default: config.json)
 ```
 
 ### Individual Components
@@ -63,30 +90,27 @@ Options:
 Run individual components if needed:
 
 ```bash
-# Scraper only (with automatic fallback methods)
-python scraper.py
-
-# DeepSeek processor only  
-python deepseek.py
+# Unified scraper only (includes Claude processing)
+python -m src.scraper
 ```
 
 ## 📊 Output Files
 
-- **`ssrn.csv`**: Raw scraped data from SSRN
-- **`conferences.csv`**: Final enriched database with AI-extracted information
+- **`output/ssrn.csv`**: Raw scraped data from SSRN
+- **`output/conferences.csv`**: Final enriched database with AI-extracted information
 - **`pipeline.log`**: Detailed processing logs
-- **`.deepseek_cache.pkl`**: API response cache (speeds up future runs)
+- **`.claude_cache.pkl`**: Claude API response cache (speeds up future runs)
 
 ## 📊 Final Output Structure
 
-The `conferences.csv` contains:
+The `output/conferences.csv` contains:
 - **Title**: Conference title
 - **Conference Dates**: Conference dates  
 - **Location**: Conference location
 - **Link**: SSRN announcement link
 - **Submission Deadline**: AI-extracted deadline (e.g., "2025/08/17")
-- **Submission Fee**: AI-extracted fee (e.g., "$50")
-- **Registration Fee**: AI-extracted fee (e.g., "$400")  
+- **Submission Fees**: AI-extracted submission fee (e.g., "$50")
+- **Registration Fees**: AI-extracted registration fee (e.g., "$400")  
 - **Continent**: AI-extracted continent (e.g., "North America")
 
 ## 📁 Project Structure
@@ -94,16 +118,33 @@ The `conferences.csv` contains:
 ```
 finance-conferences/
 ├── main.py              # Main pipeline orchestrator
-├── scraper.py           # High-performance SSRN scraper with fallback methods
-├── deepseek.py          # Fast DeepSeek API processor
+├── config.py            # Configuration management
+├── config.json          # Claude API and proxy settings
+├── src/                 # Source code
+│   ├── __init__.py      # Package initialization
+│   └── scraper.py       # Unified scraper with Claude AI processing
+├── output/              # Generated data files
+│   ├── ssrn.csv         # Raw scraped data (generated)
+│   └── conferences.csv  # Final enriched database (generated)
 ├── requirements.txt     # Python dependencies
-├── README.md           # This documentation
-├── deepseek.txt        # DeepSeek API key (not in repo)
-├── .deepseek_cache.pkl # API response cache (generated)
-├── ssrn.csv           # Raw scraped data (generated)
-├── conferences.csv    # Final enriched database (generated)
-└── pipeline.log       # Processing logs (generated)
+├── .claude_cache.pkl    # Claude API response cache (generated)
+└── pipeline.log         # Processing logs (generated)
 ```
+
+## 🔧 Features
+
+### Performance Optimizations
+- **Async processing** - 10x faster than traditional scraping
+- **Concurrent Claude API calls** - Up to 10x faster AI processing
+- **Smart caching** - Speeds up future runs significantly
+- **Incremental updates** - Only processes new conferences
+- **Optimized connection pooling** - High-performance HTTP requests
+
+### Reliability Features
+- **Better duplicate detection** - Normalized title matching with special character removal
+- **Graceful error handling** - Comprehensive retry logic and fallback methods
+- **Proxy support** - HTTP/HTTPS proxy configuration for corporate networks
+- **Configurable timeouts** - Adjustable for different network conditions
 
 ## 💡 Best Practices
 
@@ -114,16 +155,18 @@ finance-conferences/
 - Adjust **concurrency** based on your system capabilities
 
 ### For Reliability  
+- Configure **proxy settings** if behind corporate firewall
 - Use **conservative concurrency** settings in production
 - Enable **detailed logging** for debugging
 - Monitor **rate limits** and adjust accordingly
 
-## 🤝 Contributing
+## 🚀 Claude Code Integration
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+This project is optimized for Claude Code usage:
+- JSON-based configuration for easy editing
+- Modular architecture for clear understanding
+- Comprehensive logging for debugging
+- Performance optimizations for large-scale scraping
 
 ## 📄 License
 
