@@ -80,7 +80,7 @@ class UnifiedConferenceScraper:
         self.base_url = "https://www.ssrn.com"
         # SSRN has conferences on two main pages
         self.conference_urls = [
-            "https://www.ssrn.com/index.cfm/en/janda/professional-announcements/?annsNet=203#AnnType_2"
+            "https://www.ssrn.com/index.cfm/en/janda/professional-announcements/?annsNet=203#AnnType_1"
         ]
         self.conference_url = self.conference_urls[0]  # Keep for backward compatibility
         self.max_concurrent = self.scraper_config['max_concurrent']
