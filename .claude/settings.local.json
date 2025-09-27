@@ -1,14 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(cp:*)",
-      "Bash(pkill:*)",
-      "Bash(grep:*)",
-      "Bash(python:*)",
-      "Bash(rm:*)",
-      "Bash(timeout:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Read(//Users/hulaizh/hulaizh-com/**)",
+      "Bash(curl -s \"https://www.googleapis.com/calendar/v3/calendars/d46eaf726b1cf67eaa90e8497ebfa45e988283c6c973b8c04b87c203eb36075e%40group.calendar.google.com/events?key=AIzaSyBNlYH01_9Hc5S1J9vuFmu2nUqBZJNAXxs\")",
+      "Bash(python3:*)",
+      "Read(//tmp/claude/**)",
+      "Read(//Users/hulaizh/env-climate/**)"
     ],
     "deny": [],
     "ask": []
