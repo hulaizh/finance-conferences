@@ -219,7 +219,7 @@ def generate_html_page(conferences_html, title, page_type="future"):
     """Generate complete HTML page."""
     # Different descriptions based on page type
     if page_type == "future":
-        description = "Upcoming academic finance conferences with submission deadlines. Track deadlines and filter by continent."
+        description = "Upcoming academic finance conferences with submission deadlines."
         page_description = '<p class="page-description">Upcoming submission deadlines for academic finance conferences.</p>'
         nav_active = 'active'
         other_nav = ''
