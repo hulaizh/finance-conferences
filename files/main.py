@@ -144,9 +144,14 @@ def parse_date(date_str):
     if pd.isna(date_str) or not date_str:
         return None
     try:
-        return datetime.strptime(str(date_str), '%Y-%m-%d')
+        # Try parsing with timestamp first (YYYY-MM-DD HH:MM:SS)
+        return datetime.strptime(str(date_str), '%Y-%m-%d %H:%M:%S')
     except:
-        return None
+        try:
+            # Fall back to date only format (YYYY-MM-DD)
+            return datetime.strptime(str(date_str), '%Y-%m-%d')
+        except:
+            return None
 
 def filter_conferences(df, future=True):
     """Filter conferences by deadline date."""
@@ -191,7 +196,9 @@ def generate_table_html(df, table_id="conferencesTable"):
         continent = smart_title_case(str(row['continent'])) if pd.notna(row['continent']) else 'N/A'
         location = smart_title_case(str(row['location'])) if pd.notna(row['location']) else 'N/A'
         conf_date = str(row['conferenceDate']) if pd.notna(row['conferenceDate']) else 'N/A'
-        ddl = str(row['DDL']) if pd.notna(row['DDL']) else 'N/A'
+        # Strip time component from DDL display
+        ddl_str = str(row['DDL']) if pd.notna(row['DDL']) else 'N/A'
+        ddl = ddl_str.split(' ')[0] if ' ' in ddl_str else ddl_str
         link = str(row['link']) if pd.notna(row['link']) else '#'
 
         # Create clickable conference name
