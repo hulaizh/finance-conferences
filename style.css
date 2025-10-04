@@ -252,6 +252,13 @@ a:hover {
   margin: 0 4px;
 }
 
+/* Navigation Links Container */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
 /* Mobile Menu */
 .mobile-menu-toggle {
   display: none;
@@ -498,12 +505,10 @@ a:hover {
     align-items: stretch;
     z-index: 1000;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
-    opacity: 0;
   }
 
   .nav-links.active {
     display: flex;
-    opacity: 1;
   }
 
   .nav-links a {
